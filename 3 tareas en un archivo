@@ -1,0 +1,447 @@
+#include <iostream>
+
+using namespace std;
+
+class Node
+{
+private:
+  int value;
+  Node *next;
+
+public:
+
+    Node ()
+    {
+        value = NULL;
+        next = nullptr;
+    }
+
+    Node (int _newValue)
+    {
+        value = _newValue;
+        next = nullptr;
+    }
+    
+    Node(int _newValue, Node* _nextNode)
+    {
+        value = _newValue;
+        next = _nextNode;
+    }
+    
+    ~Node(){};
+
+  // Setters
+  void SetValue (int _value)
+  {
+    value = _value;
+  }
+
+  void SetNextNode (Node * _nextNode)
+  {
+    next = _nextNode;
+  }
+
+  // Getters
+  int GetValue ()
+  {
+    return value;
+  }
+
+  Node *GetNextNode ()
+  {
+    return next;
+  }
+
+};
+
+typedef Node *NodePtr;
+
+class List
+{
+private:
+  NodePtr head;
+  bool isEmpty()
+  {
+      return (head == NULL || head == nullptr);
+  };
+public:
+      List ()
+      {
+        head = nullptr;
+      }
+      
+      List(NodePtr _newNode)
+      {
+          head = _newNode;
+      }
+  
+    ~List()
+    {
+        if(!isEmpty())
+        {
+            Clear();
+        }
+    }
+    
+    NodePtr GetNode(int _value)
+    {
+        if(Contains(_value) == false) {cout << "Error: No node at given value exists" << endl; return NULL;}
+        
+        NodePtr current = head;
+        NodePtr node;
+        for(int i= 0;i < Count(); i++)
+        {
+            if(current->GetValue() == _value)
+            {
+                node = current;
+                break;
+            }
+            current = current->GetNextNode();
+        }
+        return node;
+    }
+    
+    NodePtr GetNodeByIndex(int _index)
+    {
+        if(_index < 0 || _index >= Count()) {cout << "Error: No node at given index" << endl; return NULL;}
+        NodePtr current = head;
+        NodePtr node;
+        for(int i= 0;i < Count(); i++)
+        {
+            if(i == _index)
+            {
+                node = current;
+                break;
+            }
+            current = current->GetNextNode();
+        }
+        return node;
+    }
+    
+    int GetIndexOf(NodePtr _node)
+    {
+        NodePtr tmp = head;
+        int i = 0;
+        
+        while(tmp != NULL)
+        {
+            if(tmp == _node) {return i;}
+            i++;
+            tmp = tmp->GetNextNode();
+        }
+        
+        cout << "Error: No index was found for given node" << endl;
+        return NULL;
+    }
+    
+    bool Contains(int _value)
+    {
+        NodePtr tmp = head;
+        while(tmp != NULL)
+        {
+            if(tmp->GetValue() == _value) {return true;}
+            tmp = tmp->GetNextNode();
+        }
+        return false;
+    }
+    
+    bool Contains(NodePtr _node)
+    {
+        NodePtr tmp = head;
+        while(tmp != NULL)
+        {
+            if(tmp == _node) {return true;}
+            tmp = tmp->GetNextNode();
+        }
+        return false;
+    }
+    
+    void PrintList()
+    {
+        if(isEmpty())
+        {
+            cout << "The list is empty" << endl;
+        }
+        else
+        {
+            NodePtr tmp = head;
+        
+            while(tmp != NULL)
+            {
+                cout << tmp->GetValue() << endl;
+                tmp = tmp->GetNextNode();
+            }
+        }
+    }
+    
+    int Count()
+    {
+        NodePtr tmp = head;
+        int i = 0;
+        
+        while(tmp != NULL)
+        {
+            i++;
+            tmp = tmp->GetNextNode();
+        }
+        return i;
+    }
+    
+    void PushFront(int _newValue)
+    {
+        NodePtr newNode = new Node(_newValue);
+        
+        if(isEmpty())
+        {
+            head = newNode;
+        }
+        else
+        {
+            newNode->SetNextNode(head);
+            head = newNode;
+        }
+    }
+    
+    void PushBack(int _newValue)
+    {
+        NodePtr newNode = new Node(_newValue);
+        
+        if(isEmpty())
+        {
+            head = newNode;
+        }
+        else
+        {
+            NodePtr tmp = head;
+            
+            while(tmp->GetNextNode() != NULL)
+            {
+                tmp = tmp->GetNextNode();
+            }
+            tmp->SetNextNode(newNode);
+        }
+    }
+    
+    void Pop(int _numberToBeDeleted)
+    {
+        if(isEmpty()){ cout << "The list is empty!" << endl; return; }
+        if(!Contains(_numberToBeDeleted)) { cout << "Error: The value is not found." << endl; return; }
+        if(head->GetValue() == _numberToBeDeleted)
+        {
+            NodePtr temp = head;
+            head = head->GetNextNode();
+            delete temp;
+            return;
+        }
+        
+        // SOLUCION FACIL Y NO TAN EXTENSA
+        //
+        // DESVENTAJA: Escalabilidad en tiempo de procesamiento
+        // 
+        // SOLUCION: Usar HashMaps
+        //
+        // NodePtr _prevNode = GetNodeByIndex(GetIndexOf(_nodeToDelete)-1);
+        
+        /*NodePtr _nodeToDelete = GetNode(_numberToBeDeleted);
+        NodePtr _prevNode = GetNodeByIndex(GetIndexOf(_nodeToDelete)-1);
+        _prevNode->SetNextNode(_nodeToDelete->GetNextNode());*/
+        
+        
+        NodePtr _prevNode;
+        
+        NodePtr tmp = head;
+        while((tmp->GetNextNode())->GetValue() != _numberToBeDeleted)
+        {
+            tmp = tmp->GetNextNode();
+            if(tmp->GetNextNode()->GetValue() == _numberToBeDeleted)
+            {
+                _prevNode = tmp;
+            }
+        }
+        
+        if(tmp==head) {_prevNode = tmp;}
+        
+        NodePtr _nodeToDelete = tmp->GetNextNode();
+        _prevNode->SetNextNode(_nodeToDelete->GetNextNode());
+        delete _nodeToDelete;
+        
+        
+    }
+    
+    void PopByIndex(int _index)
+    {
+        if(isEmpty()){ cout << "The list is empty!" << endl; return; }
+        if(_index >= Count()) { cout << "Error: Index out of bounds" << endl; return;}
+        NodePtr current = head;
+        if(_index == 0)
+        {
+            head = current->GetNextNode();
+            delete current;
+        }
+        else
+        {
+            for(int i= 0;i < Count(); i++)
+            {
+                if(i == _index-1)
+                {
+                    // Get the node to delete
+                    NodePtr temp = current->GetNextNode();
+                    
+                    // Connects the last node of the current to the next one of the current node
+                    current->SetNextNode(temp->GetNextNode());
+                    
+                    delete temp;
+                    break;
+                }
+                current = current->GetNextNode();
+            }
+        }
+        
+    }
+    
+    void Pop(NodePtr _node)
+    {
+        if(isEmpty()){ cout << "The list is empty!" << endl; return; }
+        NodePtr current = head;
+        if(_node == head)
+        {
+            head = current->GetNextNode();
+            delete current;
+        }
+        else
+        {
+            while(current != NULL)
+            {
+                if(current == _node)
+                {
+                    // Connects the last node of the current to the next one of the current node
+                    NodePtr tmp = GetNode(GetIndexOf(_node)-1);
+                    tmp->SetNextNode(current->GetNextNode());
+                    
+                    delete current;
+                    break;
+                }
+                current = current->GetNextNode();
+            }
+        }
+        
+    }
+    
+    void InsertBefore(int _listValue, int _newValue)
+    {
+        // Si la lista esta vacia => salte
+        if(isEmpty()) { cout << "The list is empty! (The value would be added as first)" << endl; PushFront(_newValue); }
+        // Si El numero dado no esta en la lista => salte
+        if(!Contains(_listValue)){ cout << "Error: The give value was not found on the list." << endl; return; }
+        // Si el valor es igual a la cabeza
+        if(head->GetValue() == _listValue)
+        {
+            // Creamos el nuevo nodo
+            NodePtr newNode = new Node(_newValue);
+            // Asignamos el nodo siguiente del nuevo nodo a la cabeza
+            newNode->SetNextNode(head);
+            // Asignamos la cabeza al nuevo nodo para que sea la nueva cabeza
+            head = newNode;
+            // Nos salimos de la funcion
+            return;
+        }
+        
+        
+        // Creas un nuevo nodo con el valor del nuevo nodo dado
+        NodePtr newNode = new Node(_newValue);
+        
+        // Creas un valor que es el que va a iterar sobre tu lista
+        NodePtr current = head;
+        // Creas un Valor que guardara el valor del nodo del valor dado
+        NodePtr listValueNode;
+        
+        while(current != NULL)
+        {
+            // Si el valor de mi siguiente nodo es igual a mi valor dado
+            if((current->GetNextNode())->GetValue() == _listValue)
+            {
+                // Al entrar current es el valor anterior al valor dado
+                // Asigno el nodo del valor dado a la variable que cree para guardarlo
+                listValueNode = current->GetNextNode();
+                // Creo un nodo para guardar mi nodo anterior
+                NodePtr prevNode;
+                // Guardo el valor de current(Que es mi valor del nodo anterior) en el nodo que cree parea guardar el nodo anterior
+                prevNode = current;
+                // Asigno el el nodo siguiente de mi nodo anterior al nuevo nodo (Para que esten ligados)
+                prevNode->SetNextNode(newNode);
+                // Asigno el nodo siguiente de mi nodo nuevo al nodo del valor dado
+                newNode->SetNextNode(listValueNode);
+                // Me salgo del while Lopp
+                break;
+            }
+            // Paso al siguiente nodo
+            current = current->GetNextNode();
+        }
+        
+        // Al salir current = NULL
+    }
+    
+    void InsertBefore(NodePtr _nodePivot, int _value)
+    {
+        if(!Contains(_nodePivot)) {cout << "Error: Given node does not exists in the current list" << endl; return;}
+        
+        if(_nodePivot == head)
+        {
+            NodePtr newNode = new Node(_value);
+            newNode->SetNextNode(head);
+            head = newNode;
+        }
+        else
+        {
+            NodePtr newNode = new Node(_value);
+            newNode->SetNextNode(_nodePivot);
+            
+            NodePtr prevNode = GetNode(GetIndexOf(_nodePivot)-1);
+            prevNode->SetNextNode(newNode);
+        }
+    }
+    
+    void InsertAfter(NodePtr _nodePivot, int _value)
+    {
+        if(!Contains(_nodePivot)) {cout << "Error: Given node does not exists in the current list" << endl; return;}
+        
+        if(_nodePivot->GetNextNode() == NULL)
+        {
+            PushBack(_value);
+        }
+        else
+        {
+            NodePtr nextNode = GetNode((GetIndexOf(_nodePivot)+1));
+            NodePtr newNode = new Node(_value);
+            _nodePivot->SetNextNode(newNode);
+            newNode->SetNextNode(nextNode);
+        }
+    }
+  
+    void Clear()
+    {
+        NodePtr current = head;
+        while(current != NULL) {
+            NodePtr temp = current;
+            current = current->GetNextNode();
+            delete temp;
+        }
+        
+        head = NULL;
+    }
+  
+};
+
+int main ()
+{
+    List* myList = new List();
+    
+    myList->PushFront(1);
+    myList->PushBack(2);
+    myList->PushBack(10);
+    myList->PushBack(5);
+    
+    myList->InsertBefore(1, 8);
+    myList->PrintList();
+    
+}
